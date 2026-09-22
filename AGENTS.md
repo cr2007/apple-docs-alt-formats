@@ -176,7 +176,12 @@ load an unpacked Firefox extension the way it loads a Chromium one.
 
 ## Conventions for changes in this repo
 
-- Bun only, everywhere (see Toolchain above).
+- Bun only, everywhere (see Toolchain above). This includes
+  `package.json` scripts that invoke a devDependency's own binary
+  (`wxt`, `tsc`, and so on): route them through `bunx --bun <tool>`
+  rather than calling the binary bare, even though Bun's own `node`
+  shim usually makes a bare call behave the same way. The explicit form
+  is the guarantee; don't depend on environment setup for it.
 - No emoji, no em dash, anywhere in shipped code, UI copy, or commit
   messages. (Planning docs under `docs/superpowers/` predate this rule
   and are left as a historical record, not touched retroactively.)
