@@ -29,12 +29,13 @@ entrypoints/
   apple-devdocs.content.ts   Content script entrypoint. Wires the modules below together.
 src/
   url-transform.ts           Pure functions: path -> markdown URL, path -> json URL.
-  url-transform.test.ts
   existence-check.ts         urlExists(url): HEAD request, ranged GET fallback.
-  existence-check.test.ts
   inject.ts                  DOM helpers: find anchor point, build button row, mount/remove.
-  inject.test.ts
   styles.css                 Button row styling, light and dark.
+test/
+  url-transform.test.ts
+  existence-check.test.ts
+  inject.test.ts
 scripts/
   verify.mjs                 Loads the built extension in real Chromium and checks it against live pages.
 ```
@@ -108,6 +109,15 @@ export default defineContentScript({
 });
 ```
 
+- [ ] **Step 4b: Add session tooling directories to .gitignore**
+
+Append these two lines to the end of `.gitignore`:
+
+```
+.superpowers
+.gstack
+```
+
 - [ ] **Step 5: Set package.json name and description**
 
 Edit `package.json`. Change these two fields, keep everything else:
@@ -139,18 +149,18 @@ git commit -m "chore: scaffold wxt extension project"
 
 **Files:**
 - Create: `src/url-transform.ts`
-- Test: `src/url-transform.test.ts`
+- Test: `test/url-transform.test.ts`
 
 **Interfaces:**
 - Produces: `getMarkdownUrl(pathname: string): string | null`, `getJsonUrl(pathname: string): string | null`. Both take a URL pathname (e.g. `/documentation/swiftui/view`) and return a path (e.g. `/documentation/swiftui/view.md`), or `null` if the path has no alternate.
 
 - [ ] **Step 1: Write the failing test**
 
-Create `src/url-transform.test.ts`:
+Create `test/url-transform.test.ts`:
 
 ```typescript
 import { describe, expect, test } from "bun:test";
-import { getJsonUrl, getMarkdownUrl } from "./url-transform";
+import { getJsonUrl, getMarkdownUrl } from "../src/url-transform";
 
 describe("getMarkdownUrl", () => {
   test("appends .md for documentation paths", () => {
@@ -216,10 +226,10 @@ describe("getJsonUrl", () => {
 - [ ] **Step 2: Run the test to verify it fails**
 
 ```bash
-bun test src/url-transform.test.ts
+bun test test/url-transform.test.ts
 ```
 
-Expected: FAIL, `Cannot find module './url-transform'` or similar.
+Expected: FAIL, `Cannot find module '../src/url-transform'` or similar.
 
 - [ ] **Step 3: Write the implementation**
 
@@ -259,7 +269,7 @@ export function getJsonUrl(pathname: string): string | null {
 - [ ] **Step 4: Run the test to verify it passes**
 
 ```bash
-bun test src/url-transform.test.ts
+bun test test/url-transform.test.ts
 ```
 
 Expected: PASS, 10 tests.
@@ -267,7 +277,7 @@ Expected: PASS, 10 tests.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/url-transform.ts src/url-transform.test.ts
+git add src/url-transform.ts test/url-transform.test.ts
 git commit -m "feat: add url transform helpers for markdown and json links"
 ```
 
@@ -277,7 +287,7 @@ git commit -m "feat: add url transform helpers for markdown and json links"
 
 **Files:**
 - Create: `src/existence-check.ts`
-- Test: `src/existence-check.test.ts`
+- Test: `test/existence-check.test.ts`
 
 **Interfaces:**
 - Consumes: nothing from earlier tasks.
@@ -285,11 +295,11 @@ git commit -m "feat: add url transform helpers for markdown and json links"
 
 - [ ] **Step 1: Write the failing test**
 
-Create `src/existence-check.test.ts`:
+Create `test/existence-check.test.ts`:
 
 ```typescript
 import { afterEach, describe, expect, mock, test } from "bun:test";
-import { urlExists } from "./existence-check";
+import { urlExists } from "../src/existence-check";
 
 describe("urlExists", () => {
   afterEach(() => {
@@ -335,10 +345,10 @@ describe("urlExists", () => {
 - [ ] **Step 2: Run the test to verify it fails**
 
 ```bash
-bun test src/existence-check.test.ts
+bun test test/existence-check.test.ts
 ```
 
-Expected: FAIL, `Cannot find module './existence-check'`.
+Expected: FAIL, `Cannot find module '../src/existence-check'`.
 
 - [ ] **Step 3: Write the implementation**
 
@@ -367,7 +377,7 @@ export async function urlExists(url: string): Promise<boolean> {
 - [ ] **Step 4: Run the test to verify it passes**
 
 ```bash
-bun test src/existence-check.test.ts
+bun test test/existence-check.test.ts
 ```
 
 Expected: PASS, 4 tests.
@@ -375,7 +385,7 @@ Expected: PASS, 4 tests.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/existence-check.ts src/existence-check.test.ts
+git add src/existence-check.ts test/existence-check.test.ts
 git commit -m "feat: add url existence check with head and ranged get fallback"
 ```
 
@@ -385,7 +395,7 @@ git commit -m "feat: add url existence check with head and ranged get fallback"
 
 **Files:**
 - Create: `src/inject.ts`
-- Test: `src/inject.test.ts`
+- Test: `test/inject.test.ts`
 - Modify: `package.json` (add `happy-dom` as a dev dependency, for DOM tests)
 
 **Interfaces:**
@@ -405,7 +415,7 @@ bun add -D happy-dom
 
 - [ ] **Step 2: Write the failing test**
 
-Create `src/inject.test.ts`:
+Create `test/inject.test.ts`:
 
 ```typescript
 import { afterAll, beforeEach, describe, expect, test } from "bun:test";
@@ -415,7 +425,7 @@ import {
   findAnchor,
   mountButtonRow,
   removeButtonRow,
-} from "./inject";
+} from "../src/inject";
 
 GlobalRegistrator.register();
 
@@ -545,10 +555,10 @@ afterAll(() => {
 - [ ] **Step 3: Run the test to verify it fails**
 
 ```bash
-bun test src/inject.test.ts
+bun test test/inject.test.ts
 ```
 
-Expected: FAIL, `Cannot find module './inject'`.
+Expected: FAIL, `Cannot find module '../src/inject'`.
 
 - [ ] **Step 4: Write the implementation**
 
@@ -628,7 +638,7 @@ export function removeButtonRow(root: ParentNode): void {
 - [ ] **Step 5: Run the test to verify it passes**
 
 ```bash
-bun test src/inject.test.ts
+bun test test/inject.test.ts
 ```
 
 Expected: PASS, 9 tests.
@@ -636,7 +646,7 @@ Expected: PASS, 9 tests.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/inject.ts src/inject.test.ts package.json bun.lock
+git add src/inject.ts test/inject.test.ts package.json bun.lock
 git commit -m "feat: add dom helpers to place and remove the button row"
 ```
 
