@@ -1,0 +1,25 @@
+#!/bin/sh
+# Blocks pushing a version tag (vX.Y.Z) whose version does not match
+# package.json's "version" field. The release workflow checks this too
+# (see .github/workflows/release.yml), but catching it here means a
+# mismatched tag never leaves your machine.
+#
+# Installed automatically by `bun install`, via package.json's
+# postinstall script (git config core.hooksPath .githooks). No hook
+# framework, no extra dependency: this is a plain git hook.
+
+while read -r local_ref _local_sha remote_ref _remote_sha; do
+  case "$local_ref" in
+    refs/tags/v*)
+      tag_version="${local_ref#refs/tags/v}"
+      pkg_version=$(bun -e "console.log(require('./package.json').version)")
+      if [ "$tag_version" != "$pkg_version" ]; then
+        echo "Refusing to push $local_ref: package.json version is $pkg_version, not $tag_version." >&2
+        echo "Bump package.json's version and commit it before tagging." >&2
+        exit 1
+      fi
+      ;;
+  esac
+done
+
+exit 0
