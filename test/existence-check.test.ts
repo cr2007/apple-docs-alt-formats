@@ -8,12 +8,12 @@ describe("urlExists", () => {
   });
 
   test("returns true when HEAD responds ok", async () => {
-    globalThis.fetch = mock(async () => new Response(null, { status: 200 }));
+    globalThis.fetch = mock(async () => new Response(null, { status: 200 })) as unknown as typeof fetch;
     expect(await urlExists("https://example.com/page.md")).toBe(true);
   });
 
   test("returns false when HEAD responds not found", async () => {
-    globalThis.fetch = mock(async () => new Response(null, { status: 404 }));
+    globalThis.fetch = mock(async () => new Response(null, { status: 404 })) as unknown as typeof fetch;
     expect(await urlExists("https://example.com/missing.md")).toBe(false);
   });
 
@@ -27,7 +27,7 @@ describe("urlExists", () => {
       }
       getCalled = true;
       return new Response(null, { status: 206 });
-    });
+    }) as unknown as typeof fetch;
     expect(await urlExists("https://example.com/page.json")).toBe(true);
     expect(headCalled).toBe(true);
     expect(getCalled).toBe(true);
@@ -36,7 +36,7 @@ describe("urlExists", () => {
   test("returns false when both requests fail", async () => {
     globalThis.fetch = mock(async () => {
       throw new Error("network down");
-    });
+    }) as unknown as typeof fetch;
     expect(await urlExists("https://example.com/page.md")).toBe(false);
   });
 });
