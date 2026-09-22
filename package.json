@@ -19,7 +19,8 @@
     "postinstall": "bunx --bun wxt prepare && bun run setup:hooks",
     "setup:hooks": "git rev-parse --git-dir > /dev/null 2>&1 && git config core.hooksPath .githooks || true",
     "test": "bun test",
-    "verify": "bun run build && bun scripts/verify.mjs"
+    "verify": "bun run build && bun scripts/verify.mjs",
+    "generate-icons": "bun scripts/generate-icons.mjs"
   },
   "devDependencies": {
     "@happy-dom/global-registrator": "^20.14.5",
