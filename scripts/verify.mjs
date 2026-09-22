@@ -25,6 +25,11 @@ const pages = [
     url: "https://developer.apple.com/documentation/doesnotexist123/nope",
     expectButtons: 0,
   },
+  {
+    name: "design page with a trailing slash (has markdown and json)",
+    url: "https://developer.apple.com/design/human-interface-guidelines/",
+    expectButtons: 2,
+  },
 ];
 
 let failed = false;

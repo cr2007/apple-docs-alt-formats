@@ -29,6 +29,18 @@ describe("getMarkdownUrl", () => {
       getMarkdownUrl("/tutorials/data/documentation/swiftui/view.json")
     ).toBeNull();
   });
+
+  test("strips a trailing slash before appending .md", () => {
+    expect(getMarkdownUrl("/documentation/swiftui/view/")).toBe(
+      "/documentation/swiftui/view.md"
+    );
+  });
+
+  test("strips a trailing slash before adding the tutorials/data prefix", () => {
+    expect(getMarkdownUrl("/design/human-interface-guidelines/")).toBe(
+      "/tutorials/data/design/human-interface-guidelines.md"
+    );
+  });
 });
 
 describe("getJsonUrl", () => {
@@ -58,5 +70,11 @@ describe("getJsonUrl", () => {
     expect(
       getJsonUrl("/tutorials/data/documentation/swiftui/view.json")
     ).toBeNull();
+  });
+
+  test("strips a trailing slash before adding the tutorials/data prefix", () => {
+    expect(getJsonUrl("/design/human-interface-guidelines/")).toBe(
+      "/tutorials/data/design/human-interface-guidelines.json"
+    );
   });
 });
