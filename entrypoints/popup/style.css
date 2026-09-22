@@ -55,8 +55,10 @@ dl {
 }
 
 .action-link {
-  display: block;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   padding: 7px 10px;
   border-radius: 6px;
   border: 1px solid #d2d2d7;
@@ -73,6 +75,10 @@ dl {
 
 .action-link + .action-link {
   margin-top: 8px;
+}
+
+.action-link__icon {
+  flex-shrink: 0;
 }
 
 .action-link:hover,
