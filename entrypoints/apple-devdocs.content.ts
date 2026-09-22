@@ -1,3 +1,8 @@
+import { getJsonUrl, getMarkdownUrl } from "../src/url-transform";
+import { urlExists } from "../src/existence-check";
+import { buildButtonRow, mountButtonRow, removeButtonRow } from "../src/inject";
+import "../src/styles.css";
+
 export default defineContentScript({
   matches: [
     "https://developer.apple.com/documentation/*",
@@ -5,6 +10,48 @@ export default defineContentScript({
     "https://developer.apple.com/design/*",
   ],
   main() {
-    console.debug("apple-devdocs-md-json-buttons: content script loaded");
+    let generation = 0;
+    const appMain = document.querySelector("#app-main") ?? document.body;
+
+    const observer = new MutationObserver(() => {
+      void refresh();
+    });
+
+    async function refresh() {
+      const currentGeneration = ++generation;
+      const markdownPath = getMarkdownUrl(location.pathname);
+      const jsonPath = getJsonUrl(location.pathname);
+
+      const [markdownOk, jsonOk] = await Promise.all([
+        markdownPath
+          ? urlExists(new URL(markdownPath, location.origin).toString())
+          : Promise.resolve(false),
+        jsonPath
+          ? urlExists(new URL(jsonPath, location.origin).toString())
+          : Promise.resolve(false),
+      ]);
+
+      if (currentGeneration !== generation) {
+        return;
+      }
+
+      observer.disconnect();
+      if (!markdownOk && !jsonOk) {
+        removeButtonRow(document);
+      } else {
+        const row = buildButtonRow(
+          {
+            markdownUrl: markdownOk ? markdownPath : null,
+            jsonUrl: jsonOk ? jsonPath : null,
+          },
+          document
+        );
+        mountButtonRow(document, row);
+      }
+      observer.observe(appMain, { childList: true, subtree: true });
+    }
+
+    void refresh();
+    observer.observe(appMain, { childList: true, subtree: true });
   },
 });

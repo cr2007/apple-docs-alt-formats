@@ -1,0 +1,48 @@
+.adde-button-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-family: "SF Pro Text", system-ui, -apple-system, BlinkMacSystemFont,
+    "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.adde-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid #d2d2d7;
+  background-color: #fbfbfd;
+  color: #1d1d1f;
+  font-size: 13px;
+  font-weight: 590;
+  line-height: 1.4;
+  text-decoration: none;
+  transition:
+    color 120ms ease,
+    border-color 120ms ease,
+    background-color 120ms ease;
+}
+
+.adde-button:hover,
+.adde-button:focus-visible {
+  color: #06c;
+  border-color: #06c;
+  background-color: #f5f5f7;
+}
+
+@media (prefers-color-scheme: dark) {
+  .adde-button {
+    border-color: #424245;
+    background-color: #161617;
+    color: #f5f5f7;
+  }
+
+  .adde-button:hover,
+  .adde-button:focus-visible {
+    color: #2997ff;
+    border-color: #2997ff;
+    background-color: #1d1d1f;
+  }
+}
