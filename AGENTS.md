@@ -97,6 +97,9 @@ an Xcode project, then build and run that from Xcode.
 entrypoints/
   apple-devdocs.content.ts   Content script entry. Wires the modules
                               below together; no logic of its own.
+  popup/                      Toolbar popup: name, version, build info,
+                               author, link to source. No shared logic
+                               with the content script.
 src/
   url-transform.ts   Pure functions: page path -> Markdown/JSON
                       alternate path. No DOM, no network.
@@ -108,8 +111,13 @@ src/
                          page, light and dark.
 test/
   *.test.ts   One file per src/ module. Run with `bun test`.
+assets/
+  icon.svg   Source of truth for the extension icon. Edit this, then
+             run `bun run generate-icons` to regenerate public/icon/.
 scripts/
-  verify.mjs   Live-site verification (see `bun run verify` above).
+  verify.mjs           Live-site verification (see `bun run verify` above).
+  generate-icons.mjs   Renders assets/icon.svg to every PNG size the
+                        manifest needs.
 ```
 
 Each `src/` module has one responsibility and no dependency on the
@@ -210,7 +218,8 @@ load an unpacked Firefox extension the way it loads a Chromium one.
   why, wrapped at 72 characters. No co-author trailer.
 - Buttons are real `<a href>` elements, never a JS click handler, so the
   browser's native context menu (open in new tab, copy link) works.
-- No popup, no options page, no background script, no stored settings.
-  This is a pure content script by design; do not add one of these
-  without first updating the spec.
+- No options page, no background script, no stored settings, no data
+  collection. The popup is display-only (the extension's own
+  metadata); it holds no state and makes no network requests. Don't
+  turn it into a settings surface without updating the spec first.
 - Commit only a working state: tests green, `bun run compile` clean.

@@ -22,6 +22,9 @@ Both are real links: right-click either one for the normal browser
 context menu (copy link, open in new tab, and so on). A button only
 appears if that alternate actually exists for the current page.
 
+Click the extension's own toolbar icon for a small popup showing its
+name, version, build info, and a link to this repo.
+
 ## Install
 
 This extension is not yet published to a browser store. Build it
@@ -71,7 +74,8 @@ content script that:
 4. Re-runs all of the above whenever the single-page app navigates to a
    new page, without a full reload.
 
-No popup, no options page, no background script, no data collection.
+No options page, no background script, no stored settings, no data
+collection. The popup is display-only.
 
 ## Releasing
 
