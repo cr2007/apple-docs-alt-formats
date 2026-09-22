@@ -1,6 +1,10 @@
 {
-  "name": "apple-devdocs-md-json-buttons",
+  "name": "apple-docs-alt-formats",
   "description": "Add Markdown and JSON buttons to Apple Developer Documentation pages.",
+  "author": {
+    "name": "CSK",
+    "email": "github@csk.fyi"
+  },
   "private": true,
   "version": "0.0.0",
   "type": "module",
