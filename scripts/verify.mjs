@@ -63,7 +63,12 @@ for (const colorScheme of ["light", "dark"]) {
 
   for (const check of pages) {
     const page = await context.newPage();
-    await page.goto(check.url, { waitUntil: "load", timeout: 30000 });
+    // "load" waits for every sub-resource (analytics, fonts, and so
+    // on) and has been observed to hang indefinitely on this site even
+    // though the page itself is fully usable. "domcontentloaded" is
+    // enough: the content script only needs the DOM, and the explicit
+    // waits below cover its own async existence checks.
+    await page.goto(check.url, { waitUntil: "domcontentloaded", timeout: 30000 });
 
     if (check.expectButtons > 0) {
       await page
