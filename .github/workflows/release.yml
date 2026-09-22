@@ -1,0 +1,182 @@
+name: Release
+
+# Triggered by pushing a tag like v1.2.3. Two stages:
+#
+# 1. verify: the full pre-publish gate. Unit tests, type check, both
+#    browser builds, and a live check of the Chromium build against
+#    real Apple Developer pages. Nothing below this job runs unless it
+#    passes.
+# 2. publish-chrome / publish-edge / publish-firefox: run in parallel
+#    once verify passes, each gated behind the "release" GitHub
+#    Environment. Configure that environment with required reviewers
+#    (Settings -> Environments -> release -> Required reviewers) so a
+#    human has to approve before anything reaches a real store. See
+#    AGENTS.md for the exact secrets each store needs.
+#
+# Once all three stores succeed, release-notes creates a GitHub Release
+# with an auto-generated changelog and attaches the built zips.
+#
+# Edge reuses the same Chromium build as Chrome (see publish-edge), so
+# the live check in verify covers both. Firefox only gets a build check
+# here, not a live browser check: Playwright cannot load an unpacked
+# Firefox extension the way it loads a Chromium one with --load-extension.
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  verify:
+    name: Verify before release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - name: Check the tag matches package.json's version
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          PKG_VERSION=$(bun -e "console.log(require('./package.json').version)")
+          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match package.json version $PKG_VERSION." >&2
+            echo "Bump package.json's version and commit it before tagging." >&2
+            exit 1
+          fi
+
+      - name: Unit tests
+        run: bun test
+
+      - name: Type check
+        run: bun run compile
+
+      - name: Build chrome
+        run: bun run build
+
+      - name: Build firefox
+        run: bun run build:firefox
+
+      - name: Install Playwright Chromium
+        run: bunx --bun playwright install --with-deps chromium
+
+      - name: Live-site check against real Apple Developer pages
+        run: bun run verify
+
+      - name: Upload build output
+        uses: actions/upload-artifact@v7
+        with:
+          name: extension-builds
+          path: .output
+          retention-days: 7
+
+  publish-chrome:
+    name: Publish to Chrome Web Store
+    needs: verify
+    runs-on: ubuntu-latest
+    environment: release
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - name: Zip
+        run: bun run zip
+
+      - name: Submit to Chrome Web Store
+        run: bunx --bun wxt submit --chrome-zip .output/*-chrome.zip
+        env:
+          CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+          CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL: ${{ secrets.CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL }}
+          CHROME_SERVICE_ACCOUNT_PRIVATE_KEY: ${{ secrets.CHROME_SERVICE_ACCOUNT_PRIVATE_KEY }}
+
+  publish-edge:
+    name: Publish to Microsoft Edge Add-ons
+    needs: verify
+    runs-on: ubuntu-latest
+    environment: release
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      # Edge is Chromium-based and accepts the same zip as Chrome.
+      - name: Zip
+        run: bun run zip
+
+      - name: Submit to Edge Add-ons
+        run: bunx --bun wxt submit --edge-zip .output/*-chrome.zip
+        env:
+          EDGE_PRODUCT_ID: ${{ secrets.EDGE_PRODUCT_ID }}
+          EDGE_CLIENT_ID: ${{ secrets.EDGE_CLIENT_ID }}
+          EDGE_API_KEY: ${{ secrets.EDGE_API_KEY }}
+
+  publish-firefox:
+    name: Publish to Firefox Add-ons
+    needs: verify
+    runs-on: ubuntu-latest
+    environment: release
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      # Firefox review requires the packed extension and its source, so
+      # reviewers can rebuild it and compare.
+      - name: Zip
+        run: bun run zip:firefox
+
+      - name: Submit to Firefox Add-ons
+        run: |
+          bunx --bun wxt submit \
+            --firefox-zip .output/*-firefox.zip \
+            --firefox-sources-zip .output/*-sources.zip
+        env:
+          FIREFOX_EXTENSION_ID: ${{ secrets.FIREFOX_EXTENSION_ID }}
+          FIREFOX_JWT_ISSUER: ${{ secrets.FIREFOX_JWT_ISSUER }}
+          FIREFOX_JWT_SECRET: ${{ secrets.FIREFOX_JWT_SECRET }}
+
+  release-notes:
+    name: Create GitHub Release
+    needs: [publish-chrome, publish-edge, publish-firefox]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Download build output
+        uses: actions/download-artifact@v8
+        with:
+          name: extension-builds
+          path: .output
+
+      - name: Zip build output for release assets
+        run: |
+          cd .output
+          for dir in */; do
+            name="${dir%/}"
+            zip -r "../${name}.zip" "$name"
+          done
+
+      - name: Create release with generated changelog
+        uses: softprops/action-gh-release@v3
+        with:
+          generate_release_notes: true
+          files: "*.zip"

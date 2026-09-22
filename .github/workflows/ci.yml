@@ -1,0 +1,52 @@
+name: CI
+
+# Runs on every push and every pull request. This is the fast feedback
+# loop: unit tests, a strict type check, and a build for each browser
+# target. It does not run the live-site check (that needs network
+# access to a third party site and takes longer) or publish anything.
+# See release.yml for the full pre-publish gate.
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    name: Test and type check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - name: Unit tests
+        run: bun test
+
+      - name: Type check
+        run: bun run compile
+
+  build:
+    name: Build (${{ matrix.target.browser }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target:
+          - browser: chrome
+            script: build
+          - browser: firefox
+            script: build:firefox
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - name: Build ${{ matrix.target.browser }}
+        run: bun run ${{ matrix.target.script }}
