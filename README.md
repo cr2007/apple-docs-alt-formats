@@ -22,8 +22,18 @@ Both are real links: right-click either one for the normal browser
 context menu (copy link, open in new tab, and so on). A button only
 appears if that alternate actually exists for the current page.
 
+<p>
+  <img src="docs/images/buttons-light.png" alt="Markdown and JSON buttons above a documentation page heading, light mode" width="480">
+  <img src="docs/images/buttons-dark.png" alt="Markdown and JSON buttons above a documentation page heading, dark mode" width="480">
+</p>
+
 Click the extension's own toolbar icon for a small popup showing its
 name, version, build info, and a link to this repo.
+
+<p>
+  <img src="docs/images/popup-light.png" alt="Extension popup showing name, version, build info, and links, light mode" width="280">
+  <img src="docs/images/popup-dark.png" alt="Extension popup showing name, version, build info, and links, dark mode" width="280">
+</p>
 
 ## Install
 
