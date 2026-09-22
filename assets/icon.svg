@@ -6,7 +6,7 @@
   </defs>
   <g clip-path="url(#round)">
     <rect width="128" height="128" fill="#0071e3"/>
-    <path d="M128 0 L128 128 L0 128 Z" fill="#2997ff"/>
   </g>
-  <path d="M46 38 L78 64 L46 90" fill="none" stroke="#ffffff" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M56 40 L29 64 L56 88" fill="none" stroke="#ffffff" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="86" y="82" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif" font-size="64" font-weight="700" fill="#ffd60a" text-anchor="middle">}</text>
 </svg>
