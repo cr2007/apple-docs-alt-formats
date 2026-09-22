@@ -14,6 +14,20 @@ stats-*.json
 .wxt
 web-ext.config.ts
 
+# bun
+node_modules.bun
+
+# typescript
+*.tsbuildinfo
+
+# env files
+.env
+.env.test
+
+# test coverage
+coverage
+*.lcov
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

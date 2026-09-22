@@ -16,9 +16,10 @@
 - No emoji, no em dash, anywhere in code, comments, UI copy, or commit messages.
 - No popup, no options page, no background script, no stored settings.
 - Buttons render as real `<a href>` elements, never JS click handlers.
-- Commit messages follow Conventional Commits (`feat:`, `fix:`, `test:`, `chore:`, `docs:`). Do not add any co-author trailer.
+- Commit messages follow Conventional Commits (`feat:`, `fix:`, `test:`, `chore:`, `docs:`). Every commit has a subject line and a body that explains why the change was made, wrapped at 72 characters. Do not add any co-author trailer.
 - Write commit messages and code comments in Simplified Technical English (ASD-STE100): short sentences, one idea per sentence, plain words, active voice.
 - Commit only a working state. Do not commit a step where tests are red.
+- Every element the content script creates (the button row, each button) gets a stable `id` attribute, not just a class. This makes the elements easy to find and refer to later.
 
 ---
 
@@ -278,7 +279,14 @@ Expected: PASS, 10 tests.
 
 ```bash
 git add src/url-transform.ts test/url-transform.test.ts
-git commit -m "feat: add url transform helpers for markdown and json links"
+git commit -m "$(cat <<'EOF'
+feat: add url transform helpers for markdown and json links
+
+Add pure functions that turn a page path into its markdown and
+json alternate paths. Cover the three supported sections and the
+already-a-data-path case with tests.
+EOF
+)"
 ```
 
 ---
@@ -386,7 +394,14 @@ Expected: PASS, 4 tests.
 
 ```bash
 git add src/existence-check.ts test/existence-check.test.ts
-git commit -m "feat: add url existence check with head and ranged get fallback"
+git commit -m "$(cat <<'EOF'
+feat: add url existence check with head and ranged get fallback
+
+Add a check that confirms a computed url actually resolves before
+a button uses it. Try a HEAD request first, then fall back to a
+ranged GET when HEAD is not allowed.
+EOF
+)"
 ```
 
 ---
@@ -406,6 +421,7 @@ git commit -m "feat: add url existence check with head and ranged get fallback"
   - `buildButtonRow(links: ButtonLinks, doc: Document): HTMLElement`
   - `mountButtonRow(root: ParentNode, row: HTMLElement): boolean`
   - `removeButtonRow(root: ParentNode): void`
+- The row gets `id="adde-button-row"`. The markdown link gets `id="adde-button-markdown"`. The json link gets `id="adde-button-json"`. This is in addition to the existing class names, not instead of them — classes drive styling, ids give each element a stable name to refer to.
 
 - [ ] **Step 1: Add happy-dom as a dev dependency**
 
@@ -477,10 +493,13 @@ describe("buildButtonRow", () => {
       { markdownUrl: "/a.md", jsonUrl: "/a.json" },
       document
     );
+    expect(row.id).toBe("adde-button-row");
     const links = row.querySelectorAll("a");
     expect(links).toHaveLength(2);
+    expect(links[0]?.id).toBe("adde-button-markdown");
     expect(links[0]?.getAttribute("href")).toBe("/a.md");
     expect(links[0]?.textContent).toBe("Markdown");
+    expect(links[1]?.id).toBe("adde-button-json");
     expect(links[1]?.getAttribute("href")).toBe("/a.json");
     expect(links[1]?.textContent).toBe("JSON");
   });
@@ -571,6 +590,7 @@ export interface ButtonLinks {
 }
 
 const ROW_CLASS = "adde-button-row";
+const ROW_ID = "adde-button-row";
 const BUTTON_CLASS = "adde-button";
 
 export function findAnchor(root: ParentNode): Element | null {
@@ -592,13 +612,18 @@ export function buildButtonRow(
   doc: Document
 ): HTMLElement {
   const row = doc.createElement("div");
+  row.id = ROW_ID;
   row.className = ROW_CLASS;
 
   if (links.markdownUrl) {
-    row.appendChild(buildButton(links.markdownUrl, "Markdown", doc));
+    row.appendChild(
+      buildButton(links.markdownUrl, "Markdown", "adde-button-markdown", doc)
+    );
   }
   if (links.jsonUrl) {
-    row.appendChild(buildButton(links.jsonUrl, "JSON", doc));
+    row.appendChild(
+      buildButton(links.jsonUrl, "JSON", "adde-button-json", doc)
+    );
   }
 
   return row;
@@ -607,9 +632,11 @@ export function buildButtonRow(
 function buildButton(
   url: string,
   label: string,
+  id: string,
   doc: Document
 ): HTMLAnchorElement {
   const link = doc.createElement("a");
+  link.id = id;
   link.className = BUTTON_CLASS;
   link.href = url;
   link.target = "_blank";
@@ -647,7 +674,14 @@ Expected: PASS, 9 tests.
 
 ```bash
 git add src/inject.ts test/inject.test.ts package.json bun.lock
-git commit -m "feat: add dom helpers to place and remove the button row"
+git commit -m "$(cat <<'EOF'
+feat: add dom helpers to place and remove the button row
+
+Add functions that find where to place the button row, build it,
+mount it, and remove it. Each element gets a stable id in addition
+to its class, so it is easy to find and refer to later.
+EOF
+)"
 ```
 
 ---
@@ -798,7 +832,14 @@ Expected: both finish with no errors.
 
 ```bash
 git add entrypoints/apple-devdocs.content.ts src/styles.css
-git commit -m "feat: inject markdown and json buttons into the doc page"
+git commit -m "$(cat <<'EOF'
+feat: inject markdown and json buttons into the doc page
+
+Wire the url, existence check, and dom helpers into the content
+script. Recompute and remount the buttons whenever the single page
+app changes route, without loading a full new page.
+EOF
+)"
 ```
 
 ---
@@ -932,7 +973,14 @@ Expected: `VERIFY_PASSED`, with each line showing `PASS` and the correct href li
 
 ```bash
 git add scripts/verify.mjs package.json bun.lock
-git commit -m "test: add live-site verification script"
+git commit -m "$(cat <<'EOF'
+test: add live-site verification script
+
+Load the built extension in real Chromium and check it against
+live Apple Developer pages, in light and dark mode. Confirm the
+right number of buttons appear on each page type.
+EOF
+)"
 ```
 
 ---
@@ -968,6 +1016,8 @@ No commit for this task; it only confirms the existing code builds for a second 
 - SPA navigation via MutationObserver -> Task 5.
 - Real `<a>` elements, no click handlers -> Task 4 (`buildButton`).
 - Visual design tokens (light/dark, font stack, radius, weight) -> Task 5 (`styles.css`).
+- Stable `id` attributes on every created element -> Task 4 (`buildButtonRow`, `buildButton`).
+- Commit messages with an explanatory body -> every commit step in Tasks 1-6.
 - No popup/options/storage -> confirmed in Task 1 (removed from scaffold) and Global Constraints.
 - Working verification against the real site -> Task 6.
 - Cross-browser (Chrome/Firefox build, Safari manual step documented) -> Task 1 (Chrome default), Task 7 (Firefox), Task 7 (Safari note).
