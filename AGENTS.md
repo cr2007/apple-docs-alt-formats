@@ -69,11 +69,22 @@ To load a production build by hand:
 
 **Firefox**
 1. `bun run build:firefox`
-2. Open `about:debugging#/runtime/this-firefox`
-3. **Load Temporary Add-on** -> select any file inside `.output/firefox-mv2`
-   (e.g. `manifest.json`)
-4. Firefox removes temporary add-ons on restart; reload each session,
-   or use `bun run dev:firefox` for a persistent hot-reloading loop.
+2. Open `about:debugging#/runtime/this-firefox` (not `about:addons` -
+   that page's "Install Add-on from File" only takes a signed `.xpi`
+   and will reject this build)
+3. Click **This Firefox** in the sidebar if it isn't already selected
+4. Click **Load Temporary Add-on...**, then select
+   `.output/firefox-mv2/manifest.json` directly in the file picker
+5. Firefox removes temporary add-ons on restart; reload each session
+   from the same page (there's a reload icon next to the loaded
+   extension for picking up a rebuild), or use `bun run dev:firefox`
+   for a persistent hot-reloading loop.
+
+To keep it installed across restarts without going through AMO, use
+Firefox Developer Edition or Nightly, set
+`xpinstall.signatures.required` to `false` in `about:config`, then
+install a packed `.xpi` (`bun run zip:firefox`) via `about:addons` ->
+"Install Add-on From File". Not available on regular release Firefox.
 
 **Safari**
 Not buildable from this repo directly. On macOS, run

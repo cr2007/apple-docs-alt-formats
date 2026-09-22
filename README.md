@@ -36,8 +36,11 @@ bun run build:firefox    # Firefox -> .output/firefox-mv2
 **Chrome / Edge:** open `chrome://extensions`, turn on Developer mode,
 click **Load unpacked**, and select `.output/chrome-mv3`.
 
-**Firefox:** open `about:debugging#/runtime/this-firefox`, click **Load
-Temporary Add-on**, and select any file inside `.output/firefox-mv2`.
+**Firefox:** open `about:debugging#/runtime/this-firefox` (not
+`about:addons`, which only accepts a signed `.xpi`), click **Load
+Temporary Add-on...**, and select `.output/firefox-mv2/manifest.json`.
+Firefox removes it on restart; reload from the same page after each
+rebuild. See `AGENTS.md` for how to keep it installed across restarts.
 
 **Safari:** on macOS, run
 `xcrun safari-web-extension-converter .output/chrome-mv3` to generate an
