@@ -69,3 +69,11 @@ content script that:
    new page, without a full reload.
 
 No popup, no options page, no background script, no data collection.
+
+## Releasing
+
+Pushing a version tag (`vX.Y.Z`, matching `package.json`) runs the full
+test suite across every browser target, then publishes to the Chrome
+Web Store, Microsoft Edge Add-ons, and Firefox Add-ons in parallel,
+gated behind a manual approval step. See `AGENTS.md` for the exact
+release process and the secrets it needs.

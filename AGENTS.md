@@ -123,6 +123,57 @@ unit test.
 
 See `src/url-transform.ts` for the exact implementation and TSDoc.
 
+## Continuous integration
+
+`.github/workflows/ci.yml` runs on every push and every pull request:
+`bun test`, `bun run compile`, and a build for each browser target. No
+secrets needed, nothing is published.
+
+## Releasing a new version
+
+1. Bump `"version"` in `package.json`.
+2. Commit that change.
+3. Tag the commit `vX.Y.Z`, matching `package.json` exactly, and push
+   the tag: `git push origin vX.Y.Z`.
+
+Pushing a version tag runs `.github/workflows/release.yml`:
+
+1. **verify**: confirms the tag matches `package.json`'s version, then
+   runs the full suite: unit tests, type check, both browser builds, and
+   a live check of the Chromium build against real Apple Developer
+   pages (`bun run verify`). Nothing below this runs unless it passes.
+2. **publish-chrome / publish-edge / publish-firefox**: run in parallel
+   once verify passes. Each is gated behind the `release` GitHub
+   Environment, which should be configured with required reviewers
+   (repo Settings -> Environments -> `release` -> Required reviewers),
+   so a human approves before anything reaches a real store.
+3. **release-notes**: once all three stores succeed, creates a GitHub
+   Release with an auto-generated changelog and attaches the built zips.
+
+A plain git hook (`.githooks/pre-push`, no framework, wired up
+automatically by `bun install` via the `postinstall` script) refuses to
+push a version tag that does not match `package.json`, as an earlier,
+local version of the same check the release workflow runs.
+
+**Required repository secrets**, one set per store (`wxt submit`
+underneath; see [wxt.dev/guide/essentials/publishing](https://wxt.dev/guide/essentials/publishing.html)):
+
+| Store | Secrets |
+|---|---|
+| Chrome Web Store | `CHROME_EXTENSION_ID`, `CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL`, `CHROME_SERVICE_ACCOUNT_PRIVATE_KEY` |
+| Microsoft Edge Add-ons | `EDGE_PRODUCT_ID`, `EDGE_CLIENT_ID`, `EDGE_API_KEY` |
+| Firefox Add-ons (AMO) | `FIREFOX_EXTENSION_ID`, `FIREFOX_JWT_ISSUER`, `FIREFOX_JWT_SECRET` |
+
+Until these are added (repo Settings -> Secrets and variables ->
+Actions), `verify` still passes, but the three publish jobs fail at the
+submit step. That is expected and safe: nothing publishes without them.
+
+**Known limitation:** the live check in `verify` uses real Chromium,
+which covers Chrome and, since Edge is Chromium-based and reuses the
+same build, gives strong (not literal) confidence for Edge too. Firefox
+only gets a build check, not a live browser check: Playwright cannot
+load an unpacked Firefox extension the way it loads a Chromium one.
+
 ## Conventions for changes in this repo
 
 - Bun only, everywhere (see Toolchain above).
