@@ -1,9 +1,23 @@
+/**
+ * Loads the real built extension into real Chromium and checks it
+ * against live Apple Developer pages, in light and dark mode.
+ *
+ * Step 1: build with `bun run build` before running this (the `verify`
+ * package.json script already does this for you).
+ * Step 2: for each color scheme, launch one persistent context with
+ * the extension loaded, and visit every page below.
+ * Step 3: compare the number of ".adde-button-row a" links found
+ * against what that page is expected to show.
+ * Step 4: print PASS/FAIL per check, save a screenshot, and exit
+ * non-zero if anything failed.
+ */
 import { chromium } from "playwright";
 import path from "node:path";
 import process from "node:process";
 
 const extensionPath = path.resolve(".output/chrome-mv3");
 
+/** @type {{ name: string, url: string, expectButtons: number }[]} */
 const pages = [
   {
     name: "documentation page (has markdown and json)",

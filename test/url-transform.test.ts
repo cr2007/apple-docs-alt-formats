@@ -41,6 +41,10 @@ describe("getMarkdownUrl", () => {
       "/tutorials/data/design/human-interface-guidelines.md"
     );
   });
+
+  test("returns null for the root path without mangling it", () => {
+    expect(getMarkdownUrl("/")).toBeNull();
+  });
 });
 
 describe("getJsonUrl", () => {
@@ -76,5 +80,9 @@ describe("getJsonUrl", () => {
     expect(getJsonUrl("/design/human-interface-guidelines/")).toBe(
       "/tutorials/data/design/human-interface-guidelines.json"
     );
+  });
+
+  test("returns null for the root path without mangling it", () => {
+    expect(getJsonUrl("/")).toBeNull();
   });
 });
