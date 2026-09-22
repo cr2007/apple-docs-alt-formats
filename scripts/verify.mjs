@@ -20,6 +20,11 @@ const pages = [
     url: "https://developer.apple.com/support/",
     expectButtons: 0,
   },
+  {
+    name: "documentation page that does not exist (no buttons)",
+    url: "https://developer.apple.com/documentation/doesnotexist123/nope",
+    expectButtons: 0,
+  },
 ];
 
 let failed = false;

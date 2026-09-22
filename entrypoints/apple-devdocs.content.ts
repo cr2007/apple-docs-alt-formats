@@ -11,7 +11,6 @@ export default defineContentScript({
   ],
   main() {
     let generation = 0;
-    const appMain = document.querySelector("#app-main") ?? document.body;
 
     const observer = new MutationObserver(() => {
       void refresh();
@@ -48,10 +47,10 @@ export default defineContentScript({
         );
         mountButtonRow(document, row);
       }
-      observer.observe(appMain, { childList: true, subtree: true });
+      observer.observe(document.body, { childList: true, subtree: true });
     }
 
     void refresh();
-    observer.observe(appMain, { childList: true, subtree: true });
+    observer.observe(document.body, { childList: true, subtree: true });
   },
 });

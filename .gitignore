@@ -40,3 +40,6 @@ coverage
 *.sw?
 .superpowers
 .gstack
+
+# verification screenshots
+verify-*.jpg

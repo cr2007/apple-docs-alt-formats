@@ -13,6 +13,7 @@
     "zip:firefox": "wxt zip -b firefox",
     "compile": "tsc --noEmit",
     "postinstall": "wxt prepare",
+    "test": "bun test",
     "verify": "bun run build && bun scripts/verify.mjs"
   },
   "devDependencies": {

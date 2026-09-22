@@ -6,6 +6,8 @@ export interface ButtonLinks {
 const ROW_CLASS = "adde-button-row";
 const ROW_ID = "adde-button-row";
 const BUTTON_CLASS = "adde-button";
+const MARKDOWN_BUTTON_ID = "adde-button-markdown";
+const JSON_BUTTON_ID = "adde-button-json";
 
 export function findAnchor(root: ParentNode): Element | null {
   const heroContent = root.querySelector(
@@ -31,13 +33,11 @@ export function buildButtonRow(
 
   if (links.markdownUrl) {
     row.appendChild(
-      buildButton(links.markdownUrl, "Markdown", "adde-button-markdown", doc)
+      buildButton(links.markdownUrl, "Markdown", MARKDOWN_BUTTON_ID, doc)
     );
   }
   if (links.jsonUrl) {
-    row.appendChild(
-      buildButton(links.jsonUrl, "JSON", "adde-button-json", doc)
-    );
+    row.appendChild(buildButton(links.jsonUrl, "JSON", JSON_BUTTON_ID, doc));
   }
 
   return row;
